@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: watermarkpodautoscaler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: watermarkpodautoscaler
+  template:
+    metadata:
+      annotations:
+        ad.datadoghq.com/watermarkpodautoscaler.check_names: '["prometheus"]'
+        ad.datadoghq.com/watermarkpodautoscaler.init_configs: '[{}]'
+        ad.datadoghq.com/watermarkpodautoscaler.instances: '[{"prometheus_url": "http://%%host%%:8383/metrics","namespace":"watermarkpodautoscaler","metrics": ["wpa","wpa_controller*"]}]'
+      labels:
+        name: watermarkpodautoscaler
+    spec:
+      serviceAccountName: watermarkpodautoscaler
+      containers:
+        - name: watermarkpodautoscaler
+          image: datadog/watermarkpodautoscaler:v0.0.1
+          command:
+          - watermarkpodautoscaler
+          imagePullPolicy: IfNotPresent
+          env:
+            # Watch every ns. Comment if you want to watch all namespaces
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "watermarkpodautoscaler"
