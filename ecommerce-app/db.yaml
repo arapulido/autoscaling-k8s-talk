@@ -2,11 +2,13 @@ kind: ServiceAccount
 apiVersion: v1
 metadata:
   name: postgres
+  namespace: ecommerce
 ---
 apiVersion: v1
 kind: Secret
 metadata:
   name: db-password
+  namespace: ecommerce
   labels:
     app: ecommerce
     service: db
@@ -14,26 +16,27 @@ type: Opaque
 data:
   pw: password
 ---
-  apiVersion: v1
-  kind: PersistentVolume
-  metadata:
-    name: task-pv-volume 
-    labels:
-      type: local
-  spec:
-    storageClassName: manual 
-    capacity:
-      storage: 5Gi
-    accessModes:
-      - ReadWriteOnce 
-    persistentVolumeReclaimPolicy: Retain
-    hostPath:
-      path: "/mnt/data" 
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: task-pv-volume 
+  labels:
+    type: local
+spec:
+  storageClassName: manual 
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce 
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/mnt/data" 
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: task-pvc-volume
+  namespace: ecommerce
 spec:
   accessModes:
     - ReadWriteOnce
@@ -49,6 +52,7 @@ metadata:
     service: db
     app: ecommerce
   name: db
+  namespace: ecommerce
 spec:
   replicas: 1
   selector:
@@ -58,6 +62,11 @@ spec:
   strategy: {}
   template:
     metadata:
+      annotations:
+        ad.datadoghq.com/postgres.check_names: '["postgres"]'
+        ad.datadoghq.com/postgres.init_configs: '[{}]'
+        ad.datadoghq.com/postgres.instances: '[{"host": "%%host%%", "port": "%%port%%","username": "datadog","password": "datadog" }]'
+        ad.datadoghq.com/postgres.logs: '[{"source":"postgres","service":"db"}]'
       labels:
         service: db
         app: ecommerce
@@ -97,6 +106,7 @@ metadata:
     app: ecommerce
     service: db 
   name: db
+  namespace: ecommerce
 spec:
   ports:
   - port: 5432
