@@ -21,9 +21,12 @@ spec:
         app: vpa-recommender
     spec:
       serviceAccountName: vpa-recommender
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534 # nobody
       containers:
       - name: recommender
-        image: k8s.gcr.io/vpa-recommender:0.6.3
+        image: k8s.gcr.io/autoscaling/vpa-recommender:0.10.0
         imagePullPolicy: Always
         resources:
           limits:
@@ -33,4 +36,5 @@ spec:
             cpu: 50m
             memory: 500Mi
         ports:
-        - containerPort: 8080
+        - name: prometheus
+          containerPort: 8942

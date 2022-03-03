@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
       - command: ["/bin/sh"]
-        args: ["-c", "while true; do wget frontend.ecommerce:3000; sleep 1;done"]
+        args: ["-c", "while true; do wget frontend.ecommerce:80; sleep 1;done"]
         image: busybox
         name: busybox
         resources: {}

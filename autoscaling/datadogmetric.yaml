@@ -1,0 +1,7 @@
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogMetric
+metadata:
+  name: frontend-hits
+  namespace: ecommerce
+spec:
+  query: avg:trace.rack.request.hits{service:store-frontend}.rollup(15).as_rate() 
